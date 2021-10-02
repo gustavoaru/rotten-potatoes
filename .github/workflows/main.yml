@@ -37,3 +37,17 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PWD }}
           # Log out from the Docker registry at the end of a job
           # logout: # optional, default is true
+          
+      - name: Docker Build and Push
+        uses: docker/build-push-action@v2.7.0
+        with:
+          # Dentro do projeto onde se encontra os arquivos da aplicação e Dockerfile
+          context: ./src
+          file: ./src/Dockerfile
+          # Para executar o push logo depois do build
+          push: true
+          # Deve subir a tag versionada e a latest
+          tags: |
+            gdcosta/rotten-potatos:latest
+            # Adicionando um versionamento
+            gdcosta/rotten-potatos:v${{ github.run_number }}
