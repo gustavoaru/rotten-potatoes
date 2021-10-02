@@ -47,7 +47,7 @@ jobs:
           # Para executar o push logo depois do build
           push: true
           # Deve subir a tag versionada e a latest
+          # Adicionando um versionamento com ${{ github.run_number }}
           tags: |
             gdcosta/rotten-potatos:latest
-            # Adicionando um versionamento
             gdcosta/rotten-potatos:v${{ github.run_number }}
