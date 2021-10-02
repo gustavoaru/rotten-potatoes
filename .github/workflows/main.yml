@@ -74,4 +74,4 @@ jobs:
           images: gdcosta/rotten-potatos:v${{ github.run_number }}
           # Local do manifesto do k8s
           manifests:
-            k8s/deployment.yaml
+            k8s/deployment.yml
