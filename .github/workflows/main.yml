@@ -1,0 +1,77 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI-CD
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+    
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  CI:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Docker Login
+        # You may pin to the exact commit or the version.
+        # uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        uses: docker/login-action@v1.10.0
+        with:
+          # Server address of Docker registry. If not set then will default to Docker Hub
+          # registry: # optional
+          # Username used to log against the Docker registry
+          # ${{ secrets VARIAVEL }}
+          username: ${{ secrets.DOCKERHUB_USER }}
+          # Password or personal access token used to log against the Docker registry
+          password: ${{ secrets.DOCKERHUB_PWD }}
+          # Log out from the Docker registry at the end of a job
+          # logout: # optional, default is true
+          
+      - name: Docker Build and Push
+        uses: docker/build-push-action@v2.7.0
+        with:
+          # Dentro do projeto onde se encontra os arquivos da aplicação e Dockerfile
+          context: ./src
+          file: ./src/Dockerfile
+          # Para executar o push logo depois do build
+          push: true
+          # Deve subir a tag versionada e a latest
+          # Adicionando um versionamento com ${{ github.run_number }}
+          tags: |
+            gdcosta/rotten-potatos:latest
+            gdcosta/rotten-potatos:v${{ github.run_number }}
+          
+  CD:
+    # Executa o CD apenas depois do CI
+    needs: [ CI ]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Kubernetes set context
+        uses: Azure/k8s-set-context@v1.1
+        with:
+          # Como conectar ao cluster kubernete
+          method: kubeconfig
+          kubeconfig: ${{ secrets.K8S_CONFIG }}
+          
+      - name: Deploy to Kubernetes cluster
+        uses: Azure/k8s-deploy@v1.3
+        with:
+          # Imagem do DockerHub criada acima
+          images: gdcosta/rotten-potatos:v${{ github.run_number }}
+          # Local do manifesto do k8s
+          manifests:
+            k8s/deployment.yml
