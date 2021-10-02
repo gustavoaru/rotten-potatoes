@@ -66,3 +66,12 @@ jobs:
           # Como conectar ao cluster kubernete
           method: kubeconfig
           kubeconfig: ${{ secrets.K8S_CONFIG }}
+          
+      - name: Deploy to Kubernetes cluster
+        uses: Azure/k8s-deploy@v1.3
+        with:
+          # Imagem do DockerHub criada acima
+          images: gdcosta/rotten-potatos:v${{ github.run_number }}
+          # Local do manifesto do k8s
+          manifests:
+            k8s/deployment.yaml
