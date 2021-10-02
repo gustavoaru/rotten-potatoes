@@ -51,8 +51,10 @@ jobs:
           tags: |
             gdcosta/rotten-potatos:latest
             gdcosta/rotten-potatos:v${{ github.run_number }}
-          |
+          
   CD:
+    # Executa o CD apenas depois do CI
+    needs: [ CI ]
     run-on: ubuntu-latest
     
     steps:
@@ -61,6 +63,6 @@ jobs:
       - name: Kubernetes set context
         uses: Azure/k8s-set-context@v1.1
         with:
-          #Como conectar ao cluster kubernete
+          # Como conectar ao cluster kubernete
           method: kubeconfig
-          kubeconfig: ${{ secrets.K8S_KUBECONFIG }}
+          kubeconfig: ${{ secrets.K8S_CONFIG }}
